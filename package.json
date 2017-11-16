@@ -1,0 +1,27 @@
+{
+    "name": "child-template",
+    "version": "1.0.0",
+    "description": "Template for your children!",
+    "main": "child.js",
+    "dependencies": {
+        "async": "^2.6.0"
+    },
+    "devDependencies": {
+        "child-development-kit": "github:byuitechops/child-development-kit",
+        "tap": "^10.7.3"
+    },
+    "scripts": {
+        "start": "node ./CLI/runChild.js",
+        "test": "tap ./CLI/testChild.js --cov"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/byuitechops/child-template.git"
+    },
+    "author": "Zachary Williams",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/byuitechops/child-template/issues"
+    },
+    "homepage": "https://github.com/byuitechops/child-template#readme"
+}
