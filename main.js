@@ -21,7 +21,6 @@ module.exports = (course, stepCallback) => {
         return $(resource).attr('href')
     }
 
-
     //helper function for getManifestHtmlFilepaths
     function getManifest() {
         var manifest = course.content.find(function (file) {
@@ -47,31 +46,23 @@ module.exports = (course, stepCallback) => {
     //2. Convert HTML filepaths into a cheerio parsed html file objects
     function htmlFilepathsToHtmlFileObjs(course, fplist) {
         //loop through course.content.path and "htmlFilepath"s 
-        var sortingHat = {
-                found: [],
-                notFound: []
-            },
-            arrayofHtmlFileObjs = fplist.reduce(function (found, htmlFilepath) {
-                //map to a new object?? in order to pass the objects and read their doms
-                // course.content.find() on all of the files in the course to find the one file
-                var file = course.content.find(function (file) {
-                    // return that found file object
-                    return file.name === htmlFilepath;
-                });
-
-                if (file) {
-                    htmlFileObj = {};
-                    htmlFileObj.path = file.path;
-                    htmlFileObj.dom = file.dom;
-                    found.push(htmlFileObj)
-                    console.log("FOUND:", file.name)
-                }
-
-                return found;
-            }, []);
-        //console.log('NOT FOUND', notFounds);
+        var arrayofHtmlFileObjs = fplist.reduce(function (found, htmlFilepath) {
+            //map to a new object?? in order to pass the objects and read their doms
+            // course.content.find() on all of the files in the course to find the one file
+            var file = course.content.find(function (file) {
+                // return that found file object
+                return file.name === htmlFilepath;
+            });
+            if (file) {
+                htmlFileObj = {};
+                htmlFileObj.path = file.path;
+                htmlFileObj.dom = file.dom;
+                found.push(htmlFileObj);
+                console.log("FOUND:", file.name)
+            }
+            return found;
+        }, []);
         course.success('crawlTheContent', 'successfully CONVERTED all filepaths to objects')
-        //console.log(arrayofHtmlFileObjs);
         return arrayofHtmlFileObjs;
     }
     //3. Find more HTML filepaths that are linked to from the other HTML DOMs
@@ -89,53 +80,60 @@ module.exports = (course, stepCallback) => {
             })
             //filter to HTML files
             .filter(toHtml)
-        console.log(filteredHtmlFilepathStrings)
-        /*
-        //map href BACK to HtmlFilepaths
-        .map(function (htmlFilepath) {
-            return htmlFilepath.toString();
-        });*/
-        //console.log('array of file strings', filteredHtmlFilepathStrings);
+            //map href BACK to array of HtmlFilepaths
+            .map(function (htmlFilepath) {
+                return decodeURI(htmlFilepath);
+            });
+        //console.log('filtered Html Strings', filteredHtmlFilepathStrings)
         course.success('crawlTheContent', 'successfully FOUND MORE html files');
         return filteredHtmlFilepathStrings;
     }
     //4. Remove HTML filepaths from newly found html filepath strings that we already have
-    function removeKnownFilepaths(arrayOfHtmlFilepathStrings, usedHtmlFilepaths) {
+    function removeKnownFilepaths(arrayOfHtmlFileObjs, usedHtmlFilepaths) {
         function findKnown(filepath) {
             return usedHtmlFilepaths.every(function (usedFilepath) {
-                return usedFilepath !== filepath;
+                return usedFilepath !== filepath.path;
             })
+            console.log('removed known filepaths')
         }
-        return arrayOfHtmlFilepathStrings.filter(findKnown);
+        /*apparently this function isn't running. Somehow need to pass the results to recordKnownFilepaths??*/
+        return arrayOfHtmlFileObjs.filter(findKnown);
     }
     //5.Record the newly found, not currently on the usedHtmlFilepath list
-    function recordKnownFilepaths(filteredArrayofHtmlFilepaths, usedHtmlFilepaths) {
-        usedHtmlFilepaths = usedHtmlFilepaths.concat(filteredArrayofHtmlFilepaths)
+    function recordKnownFilepaths(filteredListOfFileObjs, usedHtmlFilepaths) {
+        //converting the object into its path so it can be added to the list
+        var paths = filteredListOfFileObjs.map(function (htmlFileObj) {
+            return htmlFileObj.path;
+        })
+        //add the paths to the list
+        usedHtmlFilepaths = usedHtmlFilepaths.concat(paths);
+        console.log('recorded filepaths')
         course.success('crawlTheContent', 'successfully ADDED filepaths to the list')
     }
 
     function crawlContent(course, fplist, usedHtmlFilepaths) {
         var htmlFilepathObjs,
             moreHtmlFilepaths,
-            newusedFilepaths;
-
+            filteredListOfFileObjs;
+        //2. Convert HTML filepaths into a cheerio parsed html file objects
         htmlFilepathObjs = htmlFilepathsToHtmlFileObjs(course, fplist);
-
-        moreHtmlFilepaths = findMoreHtmlFilepaths(htmlFilepathObjs);
-        newusedFilepaths = removeKnownFilepaths(moreHtmlFilepaths, usedHtmlFilepaths);
-
-        if (newusedFilepaths.length > 0) {
-            recordKnownFilepaths(newusedFilepaths, usedHtmlFilepaths)
-            crawlContent(course, newusedFilepaths, usedHtmlFilepaths)
+        //4. Remove HTML filepaths from newly found html filepath strings that we already have
+        filteredListOfFileObjs = removeKnownFilepaths(htmlFilepathObjs, usedHtmlFilepaths);
+        //5.Record what you have, not currently on the usedHtmlFilepath list
+        recordKnownFilepaths(filteredListOfFileObjs, usedHtmlFilepaths);
+        //3. Find more HTML filepaths that are linked to from the other HTML DOMs
+        moreHtmlFilepaths = findMoreHtmlFilepaths(filteredListOfFileObjs);
+        if (moreHtmlFilepaths.length > 0) {
+            //if there are new filepaths, crawl that content for more html filepaths
+            crawlContent(course, moreHtmlFilepaths, usedHtmlFilepaths);
         }
-        course.success('crawlTheContent', 'findUsedContent: SUCCESS!')
     }
-    var usedHtmlFilepaths = [];
-    //call step1 getManifestHtmlFilepaths
-    var fplist = getManifestHtmlFilePaths(course);
+    //1. Get List of absolute filepaths in the manifest
+    var fplist = getManifestHtmlFilePaths(course),
+        usedHtmlFilepaths = [];
     //start crawling content
     crawlContent(course, fplist, usedHtmlFilepaths)
-    course.throwErr('crawlTheContent', error)
-    //console.log(course)
+    //course.throwErr('crawlTheContent', error)
     stepCallback(null, course)
+    course.success('crawlTheContent', 'findUsedContent: SUCCESS!')
 }
