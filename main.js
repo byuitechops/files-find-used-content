@@ -88,15 +88,15 @@ module.exports = (course, stepCallback) => {
         course.success('crawlTheContent', 'successfully FOUND MORE html files');
         return filteredHtmlFilepathStrings;
     }
-    //4. Remove HTML filepaths from newly found html filepath strings that we already have
+    //4. Remove HTML filepaths from newly found html filepath strings that are known
     function removeKnownFilepaths(arrayOfHtmlFileObjs, usedHtmlFilepaths) {
         function findKnown(filepath) {
             return usedHtmlFilepaths.every(function (usedFilepath) {
                 return usedFilepath !== filepath.path;
             })
-            console.log('removed known filepaths')
         }
         /*apparently this function isn't running. Somehow need to pass the results to recordKnownFilepaths??*/
+        console.log('here are my used files', arrayOfHtmlFileObjs.filter(findKnown))
         return arrayOfHtmlFileObjs.filter(findKnown);
     }
     //5.Record the newly found, not currently on the usedHtmlFilepath list
@@ -107,7 +107,7 @@ module.exports = (course, stepCallback) => {
         })
         //add the paths to the list
         usedHtmlFilepaths = usedHtmlFilepaths.concat(paths);
-        console.log('recorded filepaths')
+        console.log('recorded filepaths!\n they are:', usedHtmlFilepaths)
         course.success('crawlTheContent', 'successfully ADDED filepaths to the list')
     }
 
@@ -117,7 +117,11 @@ module.exports = (course, stepCallback) => {
             filteredListOfFileObjs;
         //2. Convert HTML filepaths into a cheerio parsed html file objects
         htmlFilepathObjs = htmlFilepathsToHtmlFileObjs(course, fplist);
-        //4. Remove HTML filepaths from newly found html filepath strings that we already have
+        if (htmlFilepathObjs.length > 0) {
+            recordKnownFilepaths(htmlFilepathObjs, usedHtmlFilepaths);
+            console.log('RECORDED!')
+        }
+        //4. Remove HTML filepaths from newly found html filepath strings that are known
         filteredListOfFileObjs = removeKnownFilepaths(htmlFilepathObjs, usedHtmlFilepaths);
         //5.Record what you have, not currently on the usedHtmlFilepath list
         recordKnownFilepaths(filteredListOfFileObjs, usedHtmlFilepaths);
