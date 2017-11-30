@@ -8,11 +8,10 @@ var async = require('async'),
 module.exports = (course, stepCallback) => {
     course.addModuleReport('crawlTheContent');
     var $;
-
+    /*convert to paths*/
     function htmlFileObjToPath(htmlFileObj) {
         return htmlFileObj.path;
     }
-
     /*filter to html*/
     function toHtml(path) {
         return pathLib.extname(path) === '.html';
@@ -24,6 +23,13 @@ module.exports = (course, stepCallback) => {
     /*filter to hrefs from an obj*/
     function toHrefCheerio(i, resource) {
         return $(resource).attr('href')
+    }
+    /*print the round of checking it's on*/
+    var start = 1;
+
+    function printRound(n) {
+        start = start + n;
+        console.log('Starting Round #', start);
     }
 
     //helper function for getManifestHtmlFilepaths
@@ -74,24 +80,23 @@ module.exports = (course, stepCallback) => {
                 return linksOut.concat(htmlFileObj.dom('a').map(toHrefCheerio).get());
             }, [])
             .filter(toUnique)
+            //filter to inturnal links
             .filter(function (url) {
                 var myUrl = URL.parse(url);
                 return myUrl.hostname === null;
             })
+            //keep only links that end in .html
             .filter(toHtml)
             //map href BACK to array of HtmlFilepaths
             .map(function (htmlFilepath) {
                 return decodeURI(htmlFilepath);
             });
-        //console.log('filtered Html Strings', filteredHtmlFilepathStrings)
+        console.log('filtered Html Strings', filteredHtmlFilepathStrings)
         course.success('crawlTheContent', 'successfully FOUND MORE html files');
         return filteredHtmlFilepathStrings;
     }
     //5. Remove HTML filepaths from newly found html filepath strings that are known
     function removeKnownFilepaths(arrayOfHtmlFileObjs, usedHtmlFilepaths) {
-        console.log("arrayOfHtmlFileObjs", arrayOfHtmlFileObjs)
-        console.log("usedHtmlFilepaths", usedHtmlFilepaths)
-
         function findKnown(filepath) {
             return usedHtmlFilepaths.every(function (usedFilepath) {
                 return usedFilepath !== filepath.path;
@@ -104,8 +109,7 @@ module.exports = (course, stepCallback) => {
     function getKnownFilepaths(filteredListOfFileObjs) {
         //converting the object into its path so it can be added to the list
         var paths = filteredListOfFileObjs.map(htmlFileObjToPath);
-
-        console.log('added: ', paths);
+        //console.log('added: ', paths);
         course.success('crawlTheContent', 'successfully ADDED filepaths to the list')
         return paths;
     }
@@ -127,9 +131,10 @@ module.exports = (course, stepCallback) => {
 
         //5. Remove HTML filepaths from newly found html filepath strings that are known
         filteredListOfFileObjs = removeKnownFilepaths(moreHtmlFilepaths, usedHtmlFilepaths);
-
+        console.log('filteredListOfFileObjs2:', filteredListOfFileObjs)
         if (filteredListOfFileObjs.length > 0) {
             //because there are new filepaths, crawl that content for more html filepaths
+            printRound(1);
             usedHtmlFilepaths = usedHtmlFilepaths
                 .concat(crawlContent(course, filteredListOfFileObjs.map(htmlFileObjToPath)))
                 //make the list unique
