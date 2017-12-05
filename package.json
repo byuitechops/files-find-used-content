@@ -1,8 +1,8 @@
 {
-    "name": "child-template",
+    "name": "files-find-used-content",
     "version": "1.0.0",
     "description": "Template for your children!",
-    "main": "child.js",
+    "main": "main.js",
     "dependencies": {
         "async": "^2.6.0"
     },
@@ -16,12 +16,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/byuitechops/child-template.git"
+        "url": "git+https://github.com/byuitechops/files-find-used-content.git"
     },
-    "author": "Zachary Williams",
-    "license": "ISC",
+    "author": "Ashley Stewart",
+    "license": "MIT",
     "bugs": {
-        "url": "https://github.com/byuitechops/child-template/issues"
+        "url": "https://github.com/byuitechops/files-find-used-content/issues"
     },
-    "homepage": "https://github.com/byuitechops/child-template#readme"
+    "homepage": "https://github.com/byuitechops/files-find-used-content#readme"
 }
