@@ -1,4 +1,7 @@
 /*eslint-env node, es6*/
+/*eslint no-unused-vars:0*/
+/*eslint no-console:0*/
+/*eslint no-undef:0*/
 var async = require('async'),
     cheerio = require('cheerio'),
     pathLib = require('path'),
@@ -143,8 +146,11 @@ module.exports = (course, stepCallback) => {
         usedHtmlFilepaths = [],
         filteredHtmlFilepathStrings;
     //start crawling content
-    usedHtmlFilepaths = crawlContent(course, fplist)
-    course.newInfo('html files used in the course', usedHtmlFilepaths);
-    //course.newInfo('html files NOT used in the course')
+    usedHtmlFilepaths = crawlContent(course, fplist);
+    var nonUsedFiles = course.content.filter(function (file) {
+        return !usedHtmlFilepaths.includes(file.name);
+    });
+    course.newInfo('usedFiles', usedHtmlFilepaths);
+    course.newInfo('nonUsedFiles', nonUsedFiles)
     stepCallback(null, course)
 }
