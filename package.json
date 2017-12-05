@@ -23,5 +23,6 @@
     "bugs": {
         "url": "https://github.com/byuitechops/files-find-used-content/issues"
     },
-    "homepage": "https://github.com/byuitechops/files-find-used-content#readme"
+    "homepage": "https://github.com/byuitechops/files-find-used-content#readme",
+    "childType": "preImport"
 }
