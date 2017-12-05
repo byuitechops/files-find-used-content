@@ -116,7 +116,6 @@ module.exports = (course, stepCallback) => {
             htmlFilepathObjs,
             moreHtmlFilepaths,
             filteredListOfFileObjs;
-        debugger;
 
         //2. Convert HTML filepaths into a cheerio parsed html file objects
         htmlFilepathObjs = htmlFilepathsToHtmlFileObjs(course, fplist);
@@ -132,7 +131,6 @@ module.exports = (course, stepCallback) => {
         if (filteredListOfFileObjs.length > 0) {
             //because there are new filepaths, crawl that content for more html filepaths
             printRound(1);
-            console.log('passing:', filteredListOfFileObjs);
             usedHtmlFilepaths = usedHtmlFilepaths
                 .concat(crawlContent(course, filteredListOfFileObjs))
                 //make the list unique
@@ -146,8 +144,7 @@ module.exports = (course, stepCallback) => {
         filteredHtmlFilepathStrings;
     //start crawling content
     usedHtmlFilepaths = crawlContent(course, fplist)
-    console.log("end:", usedHtmlFilepaths)
-    //course.throwErr('crawlTheContent', error)
+    course.newInfo('html files used in the course', usedHtmlFilepaths);
+    //course.newInfo('html files NOT used in the course')
     stepCallback(null, course)
-    course.success('crawlTheContent', 'findUsedContent: SUCCESS!')
 }

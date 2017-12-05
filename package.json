@@ -1,7 +1,7 @@
 {
     "name": "files-find-used-content",
     "version": "1.0.0",
-    "description": "Template for your children!",
+    "description": "Find the used Files in the course",
     "main": "main.js",
     "dependencies": {
         "async": "^2.6.0"
