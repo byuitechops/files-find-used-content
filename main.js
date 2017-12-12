@@ -133,7 +133,7 @@ module.exports = (course, stepCallback) => {
 
         if (filteredListOfFileObjs.length > 0) {
             //because there are new filepaths, crawl that content for more html filepaths
-            printRound(1);
+            course.success('crawlTheContent', printRound(1));
             usedHtmlFilepaths = usedHtmlFilepaths
                 .concat(crawlContent(course, filteredListOfFileObjs))
                 //make the list unique
