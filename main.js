@@ -154,7 +154,7 @@ module.exports = (course, stepCallback) => {
     nonUsedFiles = nonUsedFiles.map(file => file.name);
     //helper function for course.newInfo stuff
     function toTitle(filepaths) {
-        filepaths.map(function (path) {
+        return filepaths.map(function (path) {
             return pathLib.basename(path);
         });
     };
