@@ -150,7 +150,16 @@ module.exports = (course, stepCallback) => {
     var nonUsedFiles = course.content.filter(function (file) {
         return !usedHtmlFilepaths.includes(file.name);
     });
-    course.newInfo('usedFiles', usedHtmlFilepaths);
-    course.newInfo('nonUsedFiles', nonUsedFiles)
+
+    function toTitle(filepaths) {
+        filepaths.map(function (path) {
+            return pathLib.basename(path);
+        });
+    };
+    var allUsedFiles = toTitle(usedHtmlFilepaths),
+        allUnusedFiles = toTitle(nonUsedFiles);
+
+    course.newInfo('usedFiles', allUsedFiles);
+    course.newInfo('nonUsedFiles', allUnusedFiles)
     stepCallback(null, course)
 }
