@@ -150,7 +150,9 @@ module.exports = (course, stepCallback) => {
     var nonUsedFiles = course.content.filter(function (file) {
         return !usedHtmlFilepaths.includes(file.name);
     });
-
+    //to make a different function pass an array of strings instead of objs
+    nonUsedFiles = nonUsedFiles.map(file => file.name);
+    //helper function for course.newInfo stuff
     function toTitle(filepaths) {
         filepaths.map(function (path) {
             return pathLib.basename(path);
