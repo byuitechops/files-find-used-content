@@ -1,15 +1,14 @@
 /*eslint-env node, es6*/
-/*eslint no-unused-vars:0*/
-/*eslint no-console:0*/
-/*eslint no-undef:0*/
-var async = require('async'),
+/*eslint no-console:1*/
+
+const async = require('async'),
     cheerio = require('cheerio'),
     pathLib = require('path'),
     URL = require('url');
 
 /*Take a course object and return a list (array) of content pages that are used in the course. */
 module.exports = (course, stepCallback) => {
-    course.addModuleReport('crawlTheContent');
+    course.addModuleReport('files-find-used-content');
     var $;
     /*convert to paths*/
     function htmlFileObjToPath(htmlFileObj) {
@@ -32,7 +31,7 @@ module.exports = (course, stepCallback) => {
 
     function printRound(n) {
         start = start + n;
-        console.log('Starting Round #', start);
+        // console.log('Starting Round #', start);
     }
 
     //helper function for getManifestHtmlFilepaths
@@ -52,7 +51,7 @@ module.exports = (course, stepCallback) => {
             .get()
             .filter(toHtml)
             .filter(toUnique);
-        course.success('crawlTheContent', 'Successfully FOUND all filepaths in manifest')
+        course.success('files-find-used-content', 'Successfully FOUND all filepaths in manifest')
         return resources;
     }
 
@@ -72,7 +71,7 @@ module.exports = (course, stepCallback) => {
             }
             return found;
         }, []);
-        course.success('crawlTheContent', 'successfully CONVERTED all filepaths to objects')
+        course.success('files-find-used-content', 'successfully CONVERTED all filepaths to objects')
         return arrayofHtmlFileObjs;
     }
     //4. Find more HTML filepaths that are linked to from the other HTML DOMs
@@ -93,7 +92,7 @@ module.exports = (course, stepCallback) => {
             .map(function (htmlFilepath) {
                 return decodeURI(htmlFilepath);
             });
-        course.success('crawlTheContent', 'successfully FOUND MORE html files');
+        course.success('files-find-used-content', 'successfully FOUND MORE html files');
         return filteredHtmlFilepathStrings;
     }
     //5. Remove HTML filepaths from newly found html filepath strings that are known
@@ -110,7 +109,7 @@ module.exports = (course, stepCallback) => {
     function getKnownFilepaths(filteredListOfFileObjs) {
         //converting the object into its path so it can be added to the list
         var paths = filteredListOfFileObjs.map(htmlFileObjToPath);
-        course.success('crawlTheContent', 'successfully ADDED filepaths to the list')
+        course.success('files-find-used-content', 'successfully ADDED filepaths to the list')
         return paths;
     }
 
@@ -133,7 +132,7 @@ module.exports = (course, stepCallback) => {
 
         if (filteredListOfFileObjs.length > 0) {
             //because there are new filepaths, crawl that content for more html filepaths
-            course.success('crawlTheContent', printRound(1));
+            // course.success('files-find-used-content', printRound(1));
             usedHtmlFilepaths = usedHtmlFilepaths
                 .concat(crawlContent(course, filteredListOfFileObjs))
                 //make the list unique
