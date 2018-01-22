@@ -8,7 +8,6 @@ const async = require('async'),
 
 /*Take a course object and return a list (array) of content pages that are used in the course. */
 module.exports = (course, stepCallback) => {
-    course.addModuleReport('files-find-used-content');
     var $;
     /*convert to paths*/
     function htmlFileObjToPath(htmlFileObj) {
@@ -51,7 +50,7 @@ module.exports = (course, stepCallback) => {
             .get()
             .filter(toHtml)
             .filter(toUnique);
-        course.success('files-find-used-content', 'Successfully FOUND all filepaths in manifest')
+        course.message('All filepaths successfully located in the manifest');
         return resources;
     }
 
@@ -71,7 +70,6 @@ module.exports = (course, stepCallback) => {
             }
             return found;
         }, []);
-        course.success('files-find-used-content', 'successfully CONVERTED all filepaths to objects')
         return arrayofHtmlFileObjs;
     }
     //4. Find more HTML filepaths that are linked to from the other HTML DOMs
@@ -92,7 +90,6 @@ module.exports = (course, stepCallback) => {
             .map(function (htmlFilepath) {
                 return decodeURI(htmlFilepath);
             });
-        course.success('files-find-used-content', 'successfully FOUND MORE html files');
         return filteredHtmlFilepathStrings;
     }
     //5. Remove HTML filepaths from newly found html filepath strings that are known
@@ -109,7 +106,6 @@ module.exports = (course, stepCallback) => {
     function getKnownFilepaths(filteredListOfFileObjs) {
         //converting the object into its path so it can be added to the list
         var paths = filteredListOfFileObjs.map(htmlFileObjToPath);
-        course.success('files-find-used-content', 'successfully ADDED filepaths to the list')
         return paths;
     }
 
@@ -149,6 +145,22 @@ module.exports = (course, stepCallback) => {
     var nonUsedFiles = course.content.filter(function (file) {
         return !usedHtmlFilepaths.includes(file.name);
     });
+    var allFoundUsedFiles = course.content.filter(function (file) {
+        return usedHtmlFilepaths.includes(file.name);
+    });
+    // Log each unused file
+    nonUsedFiles.forEach(unusedFile => {
+        course.log('Unused Files', {
+            'Name': unusedFile.name,
+            'Exported Path': unusedFile.path
+        });
+    });
+    allFoundUsedFiles.forEach(usedFile => {
+        course.log('Used Files', {
+            'Name': usedFile.name,
+            'Exported Path': usedFile.path
+        });
+    });
     //to make a different function pass an array of strings instead of objs
     nonUsedFiles = nonUsedFiles.map(file => file.name);
     //helper function for course.newInfo stuff
@@ -162,5 +174,6 @@ module.exports = (course, stepCallback) => {
 
     course.newInfo('usedFiles', allUsedFiles);
     course.newInfo('nonUsedFiles', allUnusedFiles)
+    
     stepCallback(null, course)
 }
