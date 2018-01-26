@@ -1,10 +1,11 @@
 {
     "name": "files-find-used-content",
-    "version": "1.0.0",
-    "description": "Find the used Files in the course",
+    "version": "1.2.0",
+    "description": "Finds the used content in a given d2l export",
     "main": "main.js",
     "dependencies": {
         "async": "^2.6.0",
+        "cheerio": "^1.0.0-rc.2",
         "create-course-object": "github:byuitechops/create-course-object"
     },
     "devDependencies": {
@@ -17,7 +18,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/byuitechops/files-find-used-content.git"
+        "url": "git+https://maeashley:KaraDawn2013@github.com/byuitechops/files-find-used-content.git"
     },
     "author": "Ashley Stewart",
     "license": "MIT",

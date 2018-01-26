@@ -1,8 +1,7 @@
-*.html
 node_modules/
 auth.json
+package-lock.json
 D2LOriginal/*
 D2LProcessed/*
 D2LProcessing/*
 test-contact.js
-random.ext
