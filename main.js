@@ -1,12 +1,5 @@
 /*eslint-env node, es6*/
-<<<<<<< HEAD
-/*eslint no-unused-vars:0*/
-/*eslint no-console:0*/
-/*eslint no-undef:0*/
-=======
-/*eslint no-console:1*/
-
->>>>>>> origin/master
+/*eslint no-unused-vars:1*/
 const async = require('async'),
     cheerio = require('cheerio'),
     pathLib = require('path'),
@@ -35,11 +28,7 @@ module.exports = (course, stepCallback) => {
 
     function printRound(n) {
         start = start + n;
-<<<<<<< HEAD
-        //console.log(start);
-=======
         // console.log('Starting Round #', start);
->>>>>>> origin/master
     }
 
     //helper function for getManifestHtmlFilepaths
@@ -59,11 +48,9 @@ module.exports = (course, stepCallback) => {
             .get()
             .filter(toHtml)
             .filter(toUnique);
-<<<<<<< HEAD
         course.log('one single filepath:', resources[0])
-=======
         course.message('All filepaths successfully located in the manifest');
->>>>>>> origin/master
+
         return resources;
     }
 
@@ -103,7 +90,7 @@ module.exports = (course, stepCallback) => {
             .map(function (htmlFilepath) {
                 return decodeURI(htmlFilepath);
             });
-<<<<<<< HEAD
+
         if (filteredHtmlFilepathStrings.length == 0) {
             course.message('No more extra filepaths were found. Continue with conversion.');
             stepCallback(null, course);
@@ -114,8 +101,6 @@ module.exports = (course, stepCallback) => {
             }
             course.log('File Object', obj);
         }
-=======
->>>>>>> origin/master
         return filteredHtmlFilepathStrings;
     }
     //5. Remove HTML filepaths from newly found html filepath strings that are known
@@ -131,10 +116,7 @@ module.exports = (course, stepCallback) => {
     function getKnownFilepaths(filteredListOfFileObjs) {
         //converting the object into its path so it can be added to the list
         var paths = filteredListOfFileObjs.map(htmlFileObjToPath);
-<<<<<<< HEAD
         course.log('recorded filepath obj:', filteredListOfFileObjs[0])
-=======
->>>>>>> origin/master
         return paths;
     }
 
@@ -158,10 +140,6 @@ module.exports = (course, stepCallback) => {
         if (filteredListOfFileObjs.length > 0) {
             /*course.message('Starting Round #' + `${printRound(1)}`);*/
             //because there are new filepaths, crawl that content for more html filepaths
-<<<<<<< HEAD
-=======
-            // course.success('files-find-used-content', printRound(1));
->>>>>>> origin/master
             usedHtmlFilepaths = usedHtmlFilepaths
                 .concat(crawlContent(course, filteredListOfFileObjs))
                 //make the list unique
@@ -206,12 +184,6 @@ module.exports = (course, stepCallback) => {
         allUnusedFiles = toTitle(nonUsedFiles);
 
     course.newInfo('nonUsedFiles', allUnusedFiles);
-    course.newInfo('usedFiles', allUsedFiles);
-<<<<<<< HEAD
-    stepCallback(null, course);
-=======
-    course.newInfo('nonUsedFiles', allUnusedFiles)
-
-    stepCallback(null, course)
->>>>>>> origin/master
+    course.newInfo('usedFiles', allUsedFiles); <<
+    stepCallback(null, course) >>>
 }
