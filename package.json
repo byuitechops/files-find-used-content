@@ -4,15 +4,16 @@
     "description": "Find the used Files in the course",
     "main": "main.js",
     "dependencies": {
-        "async": "^2.6.0"
+        "async": "^2.6.0",
+        "create-course-object": "github:byuitechops/create-course-object"
     },
     "devDependencies": {
         "child-development-kit": "github:byuitechops/child-development-kit",
         "tap": "^10.7.3"
     },
     "scripts": {
-        "start": "node ./CLI/runChild.js",
-        "test": "tap ./CLI/testChild.js --cov"
+        "start": "node ./node_modules/child-development-kit/runChild.js",
+        "test": "tap ./node_modules/child-development-kit/testChild.js --cov"
     },
     "repository": {
         "type": "git",

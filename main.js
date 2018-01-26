@@ -2,14 +2,13 @@
 /*eslint no-unused-vars:0*/
 /*eslint no-console:0*/
 /*eslint no-undef:0*/
-var async = require('async'),
+const async = require('async'),
     cheerio = require('cheerio'),
     pathLib = require('path'),
     URL = require('url');
 
 /*Take a course object and return a list (array) of content pages that are used in the course. */
 module.exports = (course, stepCallback) => {
-    course.addModuleReport('crawlTheContent');
     var $;
     /*convert to paths*/
     function htmlFileObjToPath(htmlFileObj) {
@@ -27,12 +26,11 @@ module.exports = (course, stepCallback) => {
     function toHrefCheerio(i, resource) {
         return $(resource).attr('href')
     }
-    /*print the round of checking it's on*/
     var start = 1;
 
     function printRound(n) {
         start = start + n;
-        console.log('Starting Round #', start);
+        //console.log(start);
     }
 
     //helper function for getManifestHtmlFilepaths
@@ -52,7 +50,7 @@ module.exports = (course, stepCallback) => {
             .get()
             .filter(toHtml)
             .filter(toUnique);
-        course.success('crawlTheContent', 'Successfully FOUND all filepaths in manifest')
+        course.log('one single filepath:', resources[0])
         return resources;
     }
 
@@ -70,9 +68,9 @@ module.exports = (course, stepCallback) => {
                 htmlFileObj.dom = file.dom;
                 found.push(htmlFileObj);
             }
+            course.log('converted file to cheerio object:', file)
             return found;
         }, []);
-        course.success('crawlTheContent', 'successfully CONVERTED all filepaths to objects')
         return arrayofHtmlFileObjs;
     }
     //4. Find more HTML filepaths that are linked to from the other HTML DOMs
@@ -87,13 +85,21 @@ module.exports = (course, stepCallback) => {
                 var myUrl = URL.parse(url);
                 return myUrl.hostname === null;
             })
-            //keep only filepaths that end in .html
             .filter(toHtml)
             //map href BACK to array of HtmlFilepaths
             .map(function (htmlFilepath) {
                 return decodeURI(htmlFilepath);
             });
-        course.success('crawlTheContent', 'successfully FOUND MORE html files');
+        if (filteredHtmlFilepathStrings.length == 0) {
+            course.message('No more extra filepaths were found. Continue with conversion.');
+            stepCallback(null, course);
+        } else {
+            var obj = {
+                message: 'link to another html file called',
+                filename: filteredHtmlFilepathStrings[0]
+            }
+            course.log('File Object', obj);
+        }
         return filteredHtmlFilepathStrings;
     }
     //5. Remove HTML filepaths from newly found html filepath strings that are known
@@ -103,14 +109,13 @@ module.exports = (course, stepCallback) => {
                 return usedFilepath !== filepath.path;
             })
         }
-        /*Trying to get the filepaths to be recorded*/
         return arrayOfHtmlFileObjs.filter(findKnown);
     }
     //3.Record the newly found, not currently on the usedHtmlFilepath list
     function getKnownFilepaths(filteredListOfFileObjs) {
         //converting the object into its path so it can be added to the list
         var paths = filteredListOfFileObjs.map(htmlFileObjToPath);
-        course.success('crawlTheContent', 'successfully ADDED filepaths to the list')
+        course.log('recorded filepath obj:', filteredListOfFileObjs[0])
         return paths;
     }
 
@@ -132,8 +137,8 @@ module.exports = (course, stepCallback) => {
         filteredListOfFileObjs = removeKnownFilepaths(moreHtmlFilepaths, usedHtmlFilepaths);
 
         if (filteredListOfFileObjs.length > 0) {
+            /*course.message('Starting Round #' + `${printRound(1)}`);*/
             //because there are new filepaths, crawl that content for more html filepaths
-            course.success('crawlTheContent', printRound(1));
             usedHtmlFilepaths = usedHtmlFilepaths
                 .concat(crawlContent(course, filteredListOfFileObjs))
                 //make the list unique
@@ -157,11 +162,11 @@ module.exports = (course, stepCallback) => {
         return filepaths.map(function (path) {
             return pathLib.basename(path);
         });
-    };
+    }
     var allUsedFiles = toTitle(usedHtmlFilepaths),
         allUnusedFiles = toTitle(nonUsedFiles);
 
+    course.newInfo('nonUsedFiles', allUnusedFiles);
     course.newInfo('usedFiles', allUsedFiles);
-    course.newInfo('nonUsedFiles', allUnusedFiles)
-    stepCallback(null, course)
+    stepCallback(null, course);
 }
