@@ -13,7 +13,11 @@
     },
     "scripts": {
         "start": "node ./node_modules/child-development-kit/runChild.js",
+<<<<<<< HEAD
         "test": "tap ./node_modules/child-development-kit/testChild.js --cov"
+=======
+        "test": "tap ./node_modules/child-development-kit/testChild.js -T"
+>>>>>>> origin/master
     },
     "repository": {
         "type": "git",
