@@ -1,4 +1,4 @@
-#Find Used Content
+# Find Used Content
 
 This child module runs during preImport part of the d2l-conversion-tool. This program does the following in order:
 - Finds all used files in a given course

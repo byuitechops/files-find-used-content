@@ -1,7 +1,7 @@
 /*eslint-env node, es6*/
 /*Take a course object and return a list (array) of content pages that are used in the course. */
 module.exports = (course, stepCallback) => {
-    course.addModuleReport('crawlTheContent');
+    course.addModuleReport('files-find-used-content');
     var async = require('async'),
         cheerio = require('cheerio'),
         pathLib = require('path')
@@ -41,7 +41,7 @@ module.exports = (course, stepCallback) => {
             .filter(toUnique);
 
 
-        course.success('crawlTheContent', 'successfully found all filepaths in manifest')
+        course.success('files-find-used-content', 'successfully found all filepaths in manifest')
         return resources;
     }
 
@@ -55,7 +55,7 @@ module.exports = (course, stepCallback) => {
             return htmlFileObj;
         })
         //loop through course.content.path and "htmlFilepath"s 
-        course.success('crawlTheContent', 'successfully converted all filepaths to objects')
+        course.success('files-find-used-content', 'successfully converted all filepaths to objects')
         return arrayofHtmlFileObjs;
     }
     //3. Find more HTML filepaths that are linked to from the other HTML DOMs
@@ -80,7 +80,7 @@ module.exports = (course, stepCallback) => {
 
         })*/
         console.log('The HTML files are:', htmlFiles)
-        course.success('crawlTheContent', 'successfully found more html files');
+        course.success('files-find-used-content', 'successfully found more html files');
         return filteredHtmlFilepathStrings;
     }
     //4. Remove HTML filepaths from newly found html filepath strings that we already have
@@ -96,7 +96,7 @@ module.exports = (course, stepCallback) => {
     //5.Record the newly found, not currently on the usedHtmlFilepath list
     function recordKnownFilepaths(filteredArrayofHtmlFilepaths, usedHtmlFilepaths) {
         usedHtmlFilepaths = usedHtmlFilepaths.concat(filteredArrayofHtmlFilepaths)
-        course.success('crawlTheContent', 'successfully added more filepaths to the list')
+        course.success('files-find-used-content', 'successfully added more filepaths to the list')
     }
 
     function crawlContent(course, fplist, usedHtmlFilepaths) {
@@ -107,14 +107,14 @@ module.exports = (course, stepCallback) => {
             recordKnownFilepaths(newusedFilepaths, usedHtmlFilepaths)
             crawlContent(course, newusedFilepaths, usedHtmlFilepaths)
         }
-        course.success('crawlTheContent', 'findUsedContent: process successful!')
+        course.success('files-find-used-content', 'findUsedContent: process successful!')
     }
     var usedHtmlFilepaths = [];
     //call step1 getManifestHtmlFilepaths
     var fplist = getManifestHtmlFilePaths(course);
     //start crawling content
     crawlContent(course, fplist, usedHtmlFilepaths)
-    course.throwErr('crawlTheContent', error)
+    course.throwErr('files-find-used-content', error)
     console.log(course)
     stepCallback(null, course)
 }
