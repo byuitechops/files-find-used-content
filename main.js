@@ -184,6 +184,6 @@ module.exports = (course, stepCallback) => {
         allUnusedFiles = toTitle(nonUsedFiles);
 
     course.newInfo('nonUsedFiles', allUnusedFiles);
-    course.newInfo('usedFiles', allUsedFiles); <<
-    stepCallback(null, course) >>>
+    course.newInfo('usedFiles', allUsedFiles);
+    stepCallback(null, course);
 }
