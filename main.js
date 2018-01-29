@@ -24,12 +24,12 @@ module.exports = (course, stepCallback) => {
     function toHrefCheerio(i, resource) {
         return $(resource).attr('href')
     }
-    var start = 1;
 
+    /* var start = 1;
     function printRound(n) {
         start = start + n;
-        // console.log('Starting Round #', start);
-    }
+        console.log('Starting Round #', start);
+    } */
 
     //helper function for getManifestHtmlFilepaths
     function getManifest() {
@@ -77,8 +77,8 @@ module.exports = (course, stepCallback) => {
     function findMoreHtmlFilepaths(arrayofHtmlFileObjs) {
         //reduce array of htmlFileObjs to get ALL hrefs
         filteredHtmlFilepathStrings = arrayofHtmlFileObjs.reduce(function (linksOut, htmlFileObj) {
-                return linksOut.concat(htmlFileObj.dom('a').map(toHrefCheerio).get());
-            }, [])
+            return linksOut.concat(htmlFileObj.dom('a').map(toHrefCheerio).get());
+        }, [])
             .filter(toUnique)
             //filter to internal links
             .filter(function (url) {
@@ -91,10 +91,8 @@ module.exports = (course, stepCallback) => {
                 return decodeURI(htmlFilepath);
             });
 
-        if (filteredHtmlFilepathStrings.length == 0) {
-            course.message('No more extra filepaths were found. Continue with conversion.');
-            stepCallback(null, course);
-        } else {
+        if (filteredHtmlFilepathStrings.length > 0) {
+            // WHY IS THIS HERE?
             var obj = {
                 message: 'link to another html file called',
                 filename: filteredHtmlFilepathStrings[0]
@@ -108,7 +106,7 @@ module.exports = (course, stepCallback) => {
         function findKnown(filepath) {
             return usedHtmlFilepaths.every(function (usedFilepath) {
                 return usedFilepath !== filepath.path;
-            })
+            });
         }
         return arrayOfHtmlFileObjs.filter(findKnown);
     }
@@ -135,6 +133,7 @@ module.exports = (course, stepCallback) => {
         moreHtmlFilepaths = findMoreHtmlFilepaths(htmlFilepathObjs);
 
         //5. Remove HTML filepaths from newly found html filepath strings that are known
+        // what is moreHtmlFilepaths is undefined or empty???
         filteredListOfFileObjs = removeKnownFilepaths(moreHtmlFilepaths, usedHtmlFilepaths);
 
         if (filteredListOfFileObjs.length > 0) {
@@ -144,6 +143,8 @@ module.exports = (course, stepCallback) => {
                 .concat(crawlContent(course, filteredListOfFileObjs))
                 //make the list unique
                 .filter(toUnique);
+        } else {
+            course.message('No more extra filepaths were found.');
         }
         return usedHtmlFilepaths;
     }
