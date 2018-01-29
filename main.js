@@ -48,7 +48,7 @@ module.exports = (course, stepCallback) => {
             .get()
             .filter(toHtml)
             .filter(toUnique);
-        course.log('one single filepath:', resources[0])
+        // course.log('one single filepath:', resources[0])
         course.message('All filepaths successfully located in the manifest');
 
         return resources;
@@ -68,7 +68,7 @@ module.exports = (course, stepCallback) => {
                 htmlFileObj.dom = file.dom;
                 found.push(htmlFileObj);
             }
-            course.log('converted file to cheerio object:', file)
+            // course.log('converted file to cheerio object:', file)
             return found;
         }, []);
         return arrayofHtmlFileObjs;
@@ -97,7 +97,7 @@ module.exports = (course, stepCallback) => {
                 message: 'link to another html file called',
                 filename: filteredHtmlFilepathStrings[0]
             }
-            course.log('File Object', obj);
+            // course.log('File Object', obj);
         }
         return filteredHtmlFilepathStrings;
     }
@@ -114,7 +114,7 @@ module.exports = (course, stepCallback) => {
     function getKnownFilepaths(filteredListOfFileObjs) {
         //converting the object into its path so it can be added to the list
         var paths = filteredListOfFileObjs.map(htmlFileObjToPath);
-        course.log('recorded filepath obj:', filteredListOfFileObjs[0])
+        // course.log('recorded filepath obj:', filteredListOfFileObjs[0])
         return paths;
     }
 
