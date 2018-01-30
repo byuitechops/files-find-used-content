@@ -1,8 +1,5 @@
 /*eslint-env node, es6*/
-/*eslint no-unused-vars:1*/
-const async = require('async'),
-    cheerio = require('cheerio'),
-    pathLib = require('path'),
+const pathLib = require('path'),
     URL = require('url');
 
 /*Take a course object and return a list (array) of content pages that are used in the course. */
@@ -22,7 +19,7 @@ module.exports = (course, stepCallback) => {
     }
     /*filter to hrefs from an obj*/
     function toHrefCheerio(i, resource) {
-        return $(resource).attr('href')
+        return $(resource).attr('href');
     }
 
     /* var start = 1;
@@ -43,7 +40,7 @@ module.exports = (course, stepCallback) => {
     function getManifestHtmlFilePaths(course) {
         var manifest = getManifest();
         $ = manifest.dom;
-        resources = $('manifest resources resource[d2l_2p0\\:material_type="content"]')
+        var resources = $('manifest resources resource[d2l_2p0\\:material_type="content"]')
             .map(toHrefCheerio)
             .get()
             .filter(toHtml)
@@ -63,7 +60,7 @@ module.exports = (course, stepCallback) => {
                 return file.name === htmlFilepath;
             });
             if (file) {
-                htmlFileObj = {};
+                var htmlFileObj = {};
                 htmlFileObj.path = file.path;
                 htmlFileObj.dom = file.dom;
                 found.push(htmlFileObj);
@@ -96,7 +93,7 @@ module.exports = (course, stepCallback) => {
             var obj = {
                 message: 'link to another html file called',
                 filename: filteredHtmlFilepathStrings[0]
-            }
+            };
             // course.log('File Object', obj);
         }
         return filteredHtmlFilepathStrings;
@@ -187,4 +184,4 @@ module.exports = (course, stepCallback) => {
     course.newInfo('nonUsedFiles', allUnusedFiles);
     course.newInfo('usedFiles', allUsedFiles);
     stepCallback(null, course);
-}
+};
