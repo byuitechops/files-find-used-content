@@ -1,6 +1,5 @@
 /*eslint-env node, es6*/
-/*eslint no-unused-vars:1*/
-/*eslint no-undef:1*/
+
 const pathLib = require('path'),
     URL = require('url');
 
@@ -23,12 +22,12 @@ module.exports = (course, stepCallback) => {
     function toHrefCheerio(i, resource) {
         return $(resource).attr('href');
     }
-    var start = 1;
 
+    /* var start = 1;
     function printRound(n) {
         start = start + n;
-        // console.log('Starting Round #', start);
-    }
+        console.log('Starting Round #', start);
+    } */
 
     //helper function for getManifestHtmlFilepaths
     function getManifest() {
@@ -42,14 +41,15 @@ module.exports = (course, stepCallback) => {
     function getManifestHtmlFilePaths(course) {
         var manifest = getManifest();
         $ = manifest.dom;
-        resources = $('manifest resources resource[d2l_2p0\\:material_type="content"]')
+        var resources = $('manifest resources resource[d2l_2p0\\:material_type="content"]')
             .map(toHrefCheerio)
             .get()
             //unfiltered resources should 
             .filter(toHtml)
             .filter(toUnique);
-        course.message('All filepaths successfully located in the manifest');
 
+        // course.log('one single filepath:', resources[0])
+        // course.message('All filepaths successfully located in the manifest');
         return resources;
     }
 
@@ -62,12 +62,13 @@ module.exports = (course, stepCallback) => {
                 return file.name === htmlFilepath;
             });
             if (file) {
-                htmlFileObj = {};
+                var htmlFileObj = {};
                 htmlFileObj.path = file.path;
                 htmlFileObj.dom = file.dom;
                 found.push(htmlFileObj);
             }
-            course.message('converted file to cheerio object:', file);
+            // course.message('converted file to cheerio object:', file);
+            // course.log('converted file to cheerio object:', file)
             return found;
         }, []);
         return arrayofHtmlFileObjs;
@@ -90,15 +91,13 @@ module.exports = (course, stepCallback) => {
                 return decodeURI(htmlFilepath);
             });
 
-        if (filteredHtmlFilepathStrings.length == 0) {
-            course.message('No more extra filepaths were found. Continue with conversion.');
-            stepCallback(null, course);
-        } else {
+        if (filteredHtmlFilepathStrings.length > 0) {
+            // WHY IS THIS HERE? --> testing purposes. 
             var obj = {
                 message: 'link to another html file called',
                 filename: filteredHtmlFilepathStrings[0]
             };
-            course.log('File Object', obj);
+            // course.log('File Object', obj);
         }
         return filteredHtmlFilepathStrings;
     }
@@ -115,7 +114,7 @@ module.exports = (course, stepCallback) => {
     function getKnownFilepaths(filteredListOfFileObjs) {
         //converting the object into its path so it can be added to the list
         var paths = filteredListOfFileObjs.map(htmlFileObjToPath);
-        course.log('recorded filepath obj:', filteredListOfFileObjs[0]);
+        // course.log('recorded filepath obj:', filteredListOfFileObjs[0])
         return paths;
     }
 
@@ -134,6 +133,7 @@ module.exports = (course, stepCallback) => {
         moreHtmlFilepaths = findMoreHtmlFilepaths(htmlFilepathObjs);
 
         //5. Remove HTML filepaths from newly found html filepath strings that are known
+        // what is moreHtmlFilepaths is undefined or empty???
         filteredListOfFileObjs = removeKnownFilepaths(moreHtmlFilepaths, usedHtmlFilepaths);
 
         if (filteredListOfFileObjs.length > 0) {
@@ -143,6 +143,8 @@ module.exports = (course, stepCallback) => {
                 .concat(crawlContent(course, filteredListOfFileObjs))
                 //make the list unique
                 .filter(toUnique);
+        } else {
+            course.message('No more extra filepaths were found.');
         }
         return usedHtmlFilepaths;
     }
