@@ -1,8 +1,7 @@
 /*eslint-env node, es6*/
 /*eslint no-unused-vars:1*/
-const async = require('async'),
-    cheerio = require('cheerio'),
-    pathLib = require('path'),
+/*eslint no-undef:1*/
+const pathLib = require('path'),
     URL = require('url');
 
 /*Take a course object and return a list (array) of content pages that are used in the course. */
@@ -22,7 +21,7 @@ module.exports = (course, stepCallback) => {
     }
     /*filter to hrefs from an obj*/
     function toHrefCheerio(i, resource) {
-        return $(resource).attr('href')
+        return $(resource).attr('href');
     }
     var start = 1;
 
@@ -46,9 +45,9 @@ module.exports = (course, stepCallback) => {
         resources = $('manifest resources resource[d2l_2p0\\:material_type="content"]')
             .map(toHrefCheerio)
             .get()
+            //unfiltered resources should 
             .filter(toHtml)
             .filter(toUnique);
-        course.log('one single filepath:', resources[0])
         course.message('All filepaths successfully located in the manifest');
 
         return resources;
@@ -68,7 +67,7 @@ module.exports = (course, stepCallback) => {
                 htmlFileObj.dom = file.dom;
                 found.push(htmlFileObj);
             }
-            course.log('converted file to cheerio object:', file)
+            course.message('converted file to cheerio object:', file);
             return found;
         }, []);
         return arrayofHtmlFileObjs;
@@ -98,7 +97,7 @@ module.exports = (course, stepCallback) => {
             var obj = {
                 message: 'link to another html file called',
                 filename: filteredHtmlFilepathStrings[0]
-            }
+            };
             course.log('File Object', obj);
         }
         return filteredHtmlFilepathStrings;
@@ -108,7 +107,7 @@ module.exports = (course, stepCallback) => {
         function findKnown(filepath) {
             return usedHtmlFilepaths.every(function (usedFilepath) {
                 return usedFilepath !== filepath.path;
-            })
+            });
         }
         return arrayOfHtmlFileObjs.filter(findKnown);
     }
@@ -116,7 +115,7 @@ module.exports = (course, stepCallback) => {
     function getKnownFilepaths(filteredListOfFileObjs) {
         //converting the object into its path so it can be added to the list
         var paths = filteredListOfFileObjs.map(htmlFileObjToPath);
-        course.log('recorded filepath obj:', filteredListOfFileObjs[0])
+        course.log('recorded filepath obj:', filteredListOfFileObjs[0]);
         return paths;
     }
 
@@ -166,6 +165,7 @@ module.exports = (course, stepCallback) => {
             'Exported Path': unusedFile.path
         });
     });
+    //log all used files to the course obj
     allFoundUsedFiles.forEach(usedFile => {
         course.log('Used Files', {
             'Name': usedFile.name,
@@ -184,6 +184,6 @@ module.exports = (course, stepCallback) => {
         allUnusedFiles = toTitle(nonUsedFiles);
 
     course.newInfo('nonUsedFiles', allUnusedFiles);
-    course.newInfo('usedFiles', allUsedFiles); <<
-    stepCallback(null, course) >>>
-}
+    course.newInfo('usedFiles', allUsedFiles);
+    stepCallback(null, course);
+};
