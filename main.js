@@ -23,11 +23,29 @@ module.exports = (course, stepCallback) => {
         return $(resource).attr('href');
     }
 
-    /* var start = 1;
+    function toDocument(path) {
+        var ext = pathLib.extname(path),
+            filename = pathLib.basename(path);
+        if (ext === '.doc' || ext === '.docx' || ext === '.pdf' || ext === '.txt' || ext === '.csv' || ext === '.xlsx' ||
+            ext === '.xlsm' || ext === '.slk' || ext === '.xps' || ext == '.rtf') {
+            return filename;
+        }
+    }
+
+    function toVideo(path) {
+        var ext = pathLib.extname(path),
+            filename = pathLib.basename(path);
+        if (ext === '.swf' || ext === '.mp4' || ext === '.mov' || ext === '.wmv' || ext === '.wav' || ext === '.avi' ||
+            ext === '.mpg') {
+            return filename;
+        }
+    }
+    var start = 1;
+
     function printRound(n) {
         start = start + n;
         console.log('Starting Round #', start);
-    } */
+    }
 
     //helper function for getManifestHtmlFilepaths
     function getManifest() {
@@ -38,7 +56,8 @@ module.exports = (course, stepCallback) => {
     }
 
     //1. Get List of absolute filepaths in the manifest
-    function getManifestHtmlFilePaths(course) {
+    //remove course as a parameter, may need to add it back in
+    function getManifestHtmlFilePaths() {
         var manifest = getManifest();
         $ = manifest.dom;
         var resources = $('manifest resources resource[d2l_2p0\\:material_type="content"]')
@@ -47,9 +66,6 @@ module.exports = (course, stepCallback) => {
             //unfiltered resources should 
             .filter(toHtml)
             .filter(toUnique);
-
-        // course.log('one single filepath:', resources[0])
-        // course.message('All filepaths successfully located in the manifest');
         return resources;
     }
 
@@ -67,8 +83,6 @@ module.exports = (course, stepCallback) => {
                 htmlFileObj.dom = file.dom;
                 found.push(htmlFileObj);
             }
-            // course.message('converted file to cheerio object:', file);
-            // course.log('converted file to cheerio object:', file)
             return found;
         }, []);
         return arrayofHtmlFileObjs;
@@ -76,8 +90,8 @@ module.exports = (course, stepCallback) => {
     //4. Find more HTML filepaths that are linked to from the other HTML DOMs
     function findMoreHtmlFilepaths(arrayofHtmlFileObjs) {
         //reduce array of htmlFileObjs to get ALL hrefs
-        filteredHtmlFilepathStrings = arrayofHtmlFileObjs.reduce(function (linksOut, htmlFileObj) {
-                return linksOut.concat(htmlFileObj.dom('a').map(toHrefCheerio).get());
+        filteredHtmlFilepathStrings = arrayofHtmlFileObjs.reduce(function (htmlLinksOut, htmlFileObj) {
+                return htmlLinksOut.concat(htmlFileObj.dom('a').map(toHrefCheerio).get());
             }, [])
             .filter(toUnique)
             //filter to internal links
@@ -90,15 +104,33 @@ module.exports = (course, stepCallback) => {
             .map(function (htmlFilepath) {
                 return decodeURI(htmlFilepath);
             });
+        var images = arrayofHtmlFileObjs.reduce(function (imgsOut, fileObj) {
+            return imgsOut.concat(fileObj.dom('img').get());
+        }, []);
+        images.forEach(function (image) {
+            image = $(image);
+            var src = image.attr('src'),
+                imageTitle = pathLib.basename(src);
+            linksToImages.push(imageTitle);
+        });
+        var videos = arrayofHtmlFileObjs.reduce(function (vidsOut, fileObj) {
+                var aTags = fileObj.dom('a');
+                return vidsOut.concat(aTags.map(toHrefCheerio).get());
+            }, [])
+            .filter(toUnique)
+            .filter(toVideo);
+        videos.forEach(function (video) {
+            linksToVids.push(video);
+        });
+        var documents = arrayofHtmlFileObjs.reduce(function (docsOut, fileObj) {
+                return docsOut.concat(fileObj.dom('a').map(toHrefCheerio).get());
+            }, [])
+            .filter(toUnique)
+            .filter(toDocument);
+        documents.forEach(function (doc) {
+            linkstoDocs.push(doc);
+        });
 
-        if (filteredHtmlFilepathStrings.length > 0) {
-            // WHY IS THIS HERE? --> testing purposes. 
-            var obj = {
-                message: 'link to another html file called',
-                filename: filteredHtmlFilepathStrings[0]
-            };
-            // course.log('File Object', obj);
-        }
         return filteredHtmlFilepathStrings;
     }
     //5. Remove HTML filepaths from newly found html filepath strings that are known
@@ -114,7 +146,6 @@ module.exports = (course, stepCallback) => {
     function getKnownFilepaths(filteredListOfFileObjs) {
         //converting the object into its path so it can be added to the list
         var paths = filteredListOfFileObjs.map(htmlFileObjToPath);
-        // course.log('recorded filepath obj:', filteredListOfFileObjs[0])
         return paths;
     }
 
@@ -133,11 +164,10 @@ module.exports = (course, stepCallback) => {
         moreHtmlFilepaths = findMoreHtmlFilepaths(htmlFilepathObjs);
 
         //5. Remove HTML filepaths from newly found html filepath strings that are known
-        // what is moreHtmlFilepaths is undefined or empty???
         filteredListOfFileObjs = removeKnownFilepaths(moreHtmlFilepaths, usedHtmlFilepaths);
 
         if (filteredListOfFileObjs.length > 0) {
-            /*course.message('Starting Round #' + `${printRound(1)}`);*/
+            printRound(1);
             //because there are new filepaths, crawl that content for more html filepaths
             usedHtmlFilepaths = usedHtmlFilepaths
                 .concat(crawlContent(course, filteredListOfFileObjs))
@@ -151,41 +181,52 @@ module.exports = (course, stepCallback) => {
     //1. Get List of absolute filepaths in the manifest
     var fplist = getManifestHtmlFilePaths(course),
         usedHtmlFilepaths = [],
-        filteredHtmlFilepathStrings;
+        filteredHtmlFilepathStrings,
+        linksToImages = [],
+        linkstoDocs = [],
+        linksToVids = [];
     //start crawling content
     usedHtmlFilepaths = crawlContent(course, fplist);
+    var allFiles = usedHtmlFilepaths.map(function (fp) {
+        var filename = pathLib.basename(fp);
+        return filename;
+    });
+    linksToImages.forEach(function (image) {
+        allFiles.push(image);
+    });
+    linkstoDocs.forEach(function (doc) {
+        allFiles.push(doc);
+    });
+    linksToVids.forEach(function (vid) {
+        allFiles.push(vid);
+    });
+    // console.log('USED files', allFiles);
     var nonUsedFiles = course.content.filter(function (file) {
-        return !usedHtmlFilepaths.includes(file.name);
+        var ext = file.ext;
+        if (ext !== '.xml') {
+            return !allFiles.includes(file.name);
+            //this if statement is not working -- don't want to delete the course css or scripts
+        } else if (file.name === 'course.css' || file.name === 'course.js') {
+            allFiles.push(file.name);
+        }
     });
-    var allFoundUsedFiles = course.content.filter(function (file) {
-        return usedHtmlFilepaths.includes(file.name);
-    });
-    // Log each unused file
+    nonUsedFiles = nonUsedFiles.map(file => file.name);
+    // console.log('UNUSED', nonUsedFiles);
+    // Log each unused file --PROBLEM: name and path are undefined
     nonUsedFiles.forEach(unusedFile => {
         course.log('Unused Files', {
             'Name': unusedFile.name,
             'Exported Path': unusedFile.path
         });
     });
-    //log all used files to the course obj
-    allFoundUsedFiles.forEach(usedFile => {
+    //log all used files to the course obj PROBLEM: name and path are undefined
+    allFiles.forEach(usedFile => {
         course.log('Used Files', {
             'Name': usedFile.name,
             'Exported Path': usedFile.path
         });
     });
-    //to make a different function pass an array of strings instead of objs
-    nonUsedFiles = nonUsedFiles.map(file => file.name);
-    //helper function for course.newInfo stuff
-    function toTitle(filepaths) {
-        return filepaths.map(function (path) {
-            return pathLib.basename(path);
-        });
-    }
-    var allUsedFiles = toTitle(usedHtmlFilepaths),
-        allUnusedFiles = toTitle(nonUsedFiles);
-
-    course.newInfo('nonUsedFiles', allUnusedFiles);
-    course.newInfo('usedFiles', allUsedFiles);
+    course.newInfo('usedFiles', usedHtmlFilepaths);
+    course.newInfo('nonUsedFiles', nonUsedFiles);
     stepCallback(null, course);
 };
