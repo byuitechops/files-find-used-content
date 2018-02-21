@@ -2,10 +2,17 @@
 
 const pathLib = require('path'),
     URL = require('url');
-
+//need to update function comments and documentation
 /*Take a course object and return a list (array) of content pages that are used in the course. */
 module.exports = (course, stepCallback) => {
     var $;
+    var docExts = ['.doc', '.docx', '.pdf', '.xls', '.xlsx', '.csv', '.odt', '.ods', '.txt', '.dat', '.log', '.mdb', '.sav', '.sql', '.tar',
+            '.xlr', '.wpd', '.wks', '.wps', '.xlsm', '.rtf', '.xps', '.ppt', '.pptx', '.pps', '.slk',
+        ],
+        imgExts = ['.png', '.jpeg', '.gif', '.bmp', '.ai', '.ico', '.jpg', '.ps', '.psd', '.svg', '.tif', '.tiff'],
+        audVidExts = ['.avi', '.wmv', '.mpg', '.mpeg', '.swf', '.mov', '.mp4', '.aif', '.cda', '.mid', '.midi', '.mp3', '.wav', '.ogg',
+            '.wma', '.wpl'
+        ];
     /*convert to paths*/
     function htmlFileObjToPath(htmlFileObj) {
         return htmlFileObj.path;
@@ -22,22 +29,10 @@ module.exports = (course, stepCallback) => {
     function toHrefCheerio(i, resource) {
         return $(resource).attr('href');
     }
-
-    function toDocument(path) {
-        var ext = pathLib.extname(path),
-            filename = pathLib.basename(path);
-        if (ext === '.doc' || ext === '.docx' || ext === '.pdf' || ext === '.txt' || ext === '.csv' || ext === '.xlsx' ||
-            ext === '.xlsm' || ext === '.slk' || ext === '.xps' || ext == '.rtf') {
-            return filename;
-        }
-    }
-
-    function toVideo(path) {
-        var ext = pathLib.extname(path),
-            filename = pathLib.basename(path);
-        if (ext === '.swf' || ext === '.mp4' || ext === '.mov' || ext === '.wmv' || ext === '.wav' || ext === '.avi' ||
-            ext === '.mpg') {
-            return filename;
+    /*filter out quicklinks, they don't need to be accounted for */
+    function noQuicklink(path) {
+        if (!path.includes('quickLink')) {
+            return path;
         }
     }
     var start = 1;
@@ -46,7 +41,31 @@ module.exports = (course, stepCallback) => {
         start = start + n;
         console.log('Starting Round #', start);
     }
-
+    /*sorts hrefs to get used content, not just html filepaths */
+    function sortHrefs(hrefs) {
+        hrefs.forEach(function (href) {
+            var ext = pathLib.extname(href),
+                name = pathLib.basename(href);
+            if (imgExts.includes(ext)) {
+                courseImages.push({
+                    name: href,
+                    ext: name
+                });
+            } else if (docExts.includes(ext)) {
+                courseDocs.push({
+                    name: href,
+                    ext: name
+                });
+            } else if (audVidExts.includes(ext)) {
+                courseVids.push({
+                    name: href,
+                    path: name
+                });
+            } else if (ext !== '.html') {
+                course.warning('file type not recognized ' + href);
+            }
+        });
+    }
     //helper function for getManifestHtmlFilepaths
     function getManifest() {
         var manifest = course.content.find(function (file) {
@@ -72,7 +91,7 @@ module.exports = (course, stepCallback) => {
     //2. Convert HTML filepaths into a cheerio parsed html file objects
     function htmlFilepathsToHtmlFileObjs(course, fplist) {
         var arrayofHtmlFileObjs = fplist.reduce(function (found, htmlFilepath) {
-            //map to a new object?? in order to pass the objects and read their doms    
+            //map to files in order to pass the objects and read their doms    
             var file = course.content.find(function (file) {
                 // return that found file object
                 return file.name === htmlFilepath;
@@ -89,8 +108,10 @@ module.exports = (course, stepCallback) => {
     }
     //4. Find more HTML filepaths that are linked to from the other HTML DOMs
     function findMoreHtmlFilepaths(arrayofHtmlFileObjs) {
+        //need to write a separate function for css files and js files
         //reduce array of htmlFileObjs to get ALL hrefs
-        filteredHtmlFilepathStrings = arrayofHtmlFileObjs.reduce(function (htmlLinksOut, htmlFileObj) {
+        filteredHtmlFilepathStrings = arrayofHtmlFileObjs
+            .reduce(function (htmlLinksOut, htmlFileObj) {
                 return htmlLinksOut.concat(htmlFileObj.dom('a').map(toHrefCheerio).get());
             }, [])
             .filter(toUnique)
@@ -104,33 +125,31 @@ module.exports = (course, stepCallback) => {
             .map(function (htmlFilepath) {
                 return decodeURI(htmlFilepath);
             });
-        var images = arrayofHtmlFileObjs.reduce(function (imgsOut, fileObj) {
-            return imgsOut.concat(fileObj.dom('img').get());
-        }, []);
-        images.forEach(function (image) {
+        //retrieve image tags and add them to courseImages
+        var imageTags = arrayofHtmlFileObjs.reduce(function (imgsOut, fileObj) {
+                return imgsOut.concat(fileObj.dom('img').get());
+            }, [])
+            .filter(toUnique);
+        imageTags.forEach(function (image) {
             image = $(image);
             var src = image.attr('src'),
                 imageTitle = pathLib.basename(src);
-            linksToImages.push(imageTitle);
+            courseImages.push({
+                name: imageTitle,
+                path: src
+            });
         });
-        var videos = arrayofHtmlFileObjs.reduce(function (vidsOut, fileObj) {
-                var aTags = fileObj.dom('a');
-                return vidsOut.concat(aTags.map(toHrefCheerio).get());
+        //get other file types like docs, videos, etc and add them to courseFiles
+        var courseFiles = arrayofHtmlFileObjs.reduce(function (imgsOut, fileObj) {
+                return imgsOut.concat(fileObj.dom('a').map(toHrefCheerio).get());
             }, [])
+            .filter(function (url) {
+                var myUrl = URL.parse(url);
+                return myUrl.hostname === null;
+            })
             .filter(toUnique)
-            .filter(toVideo);
-        videos.forEach(function (video) {
-            linksToVids.push(video);
-        });
-        var documents = arrayofHtmlFileObjs.reduce(function (docsOut, fileObj) {
-                return docsOut.concat(fileObj.dom('a').map(toHrefCheerio).get());
-            }, [])
-            .filter(toUnique)
-            .filter(toDocument);
-        documents.forEach(function (doc) {
-            linkstoDocs.push(doc);
-        });
-
+            .filter(noQuicklink);
+        sortHrefs(courseFiles);
         return filteredHtmlFilepathStrings;
     }
     //5. Remove HTML filepaths from newly found html filepath strings that are known
@@ -157,6 +176,7 @@ module.exports = (course, stepCallback) => {
 
         //2. Convert HTML filepaths into a cheerio parsed html file objects
         htmlFilepathObjs = htmlFilepathsToHtmlFileObjs(course, fplist);
+
         //3.Record the paths we found
         usedHtmlFilepaths = getKnownFilepaths(htmlFilepathObjs);
 
@@ -182,50 +202,61 @@ module.exports = (course, stepCallback) => {
     var fplist = getManifestHtmlFilePaths(course),
         usedHtmlFilepaths = [],
         filteredHtmlFilepathStrings,
-        linksToImages = [],
-        linkstoDocs = [],
-        linksToVids = [];
+        courseImages = [],
+        courseDocs = [],
+        courseVids = [],
+        nonUsedFiles;
+
     //start crawling content
     usedHtmlFilepaths = crawlContent(course, fplist);
-    var allFiles = usedHtmlFilepaths.map(function (fp) {
-        var filename = pathLib.basename(fp);
-        return filename;
-    });
-    linksToImages.forEach(function (image) {
-        allFiles.push(image);
-    });
-    linkstoDocs.forEach(function (doc) {
-        allFiles.push(doc);
-    });
-    linksToVids.forEach(function (vid) {
-        allFiles.push(vid);
-    });
-    // console.log('USED files', allFiles);
-    var nonUsedFiles = course.content.filter(function (file) {
-        var ext = file.ext;
-        if (ext !== '.xml') {
-            return !allFiles.includes(file.name);
-            //this if statement is not working -- don't want to delete the course css or scripts
-        } else if (file.name === 'course.css' || file.name === 'course.js') {
-            allFiles.push(file.name);
-        }
-    });
+    // wrapItUp(usedHtmlFilepaths);
+    wrapItUp(usedHtmlFilepaths);
+
+    function wrapItUp(usedHtmlFilepaths) {
+        var allFiles = usedHtmlFilepaths.map(function (fp) {
+            var filename = pathLib.basename(fp);
+            return {
+                name: filename,
+                path: fp
+            };
+        });
+        //put all the used images, docs and audio/video file objects to allFiles
+        allFiles = allFiles.concat(courseImages, courseDocs, courseVids);
+        var codeFilesExts = ['.xml', '.js', '.css'];
+
+        nonUsedFiles = course.content.filter(function (file) {
+            var ext = file.ext;
+            //don't enter the checking phase if it is a code file as well as don't keep it in nonusedFiles
+            if (codeFilesExts.includes(ext)) {
+                return false;
+            }
+            //this checking phase needs to work
+            for (var i = 0; i < allFiles.length - 1; i++) {
+                if (allFiles[i].name === file.name) {
+                    return false;
+                }
+            }
+        });
+        // console.log('USED', allFiles);
+        // console.log('UNUSED', nonUsedFiles);
+        // debugger;
+        nonUsedFiles.forEach(unusedFile => {
+            course.log('Unused Files', {
+                'Name': unusedFile.name,
+                'Exported Path': unusedFile.path
+            });
+        });
+        allFiles.forEach(usedFile => {
+            if (!usedFile.path) {
+                console.log(course.warning('this file does not have a path property: ' + usedFile));
+            }
+            course.log('Used Files', {
+                'Name': usedFile.name,
+                'Exported Path': usedFile.path
+            });
+        });
+    }
     nonUsedFiles = nonUsedFiles.map(file => file.name);
-    // console.log('UNUSED', nonUsedFiles);
-    // Log each unused file --PROBLEM: name and path are undefined
-    nonUsedFiles.forEach(unusedFile => {
-        course.log('Unused Files', {
-            'Name': unusedFile.name,
-            'Exported Path': unusedFile.path
-        });
-    });
-    //log all used files to the course obj PROBLEM: name and path are undefined
-    allFiles.forEach(usedFile => {
-        course.log('Used Files', {
-            'Name': usedFile.name,
-            'Exported Path': usedFile.path
-        });
-    });
     course.newInfo('usedFiles', usedHtmlFilepaths);
     course.newInfo('nonUsedFiles', nonUsedFiles);
     stepCallback(null, course);
