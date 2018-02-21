@@ -13,6 +13,7 @@
     },
     "scripts": {
         "start": "node ./node_modules/child-development-kit/runChild.js",
+        "inspect": "node --inspect-brk ./node_modules/child-development-kit/runChild.js",
         "test": "tap ./node_modules/child-development-kit/testChild.js -T"
     },
     "repository": {
