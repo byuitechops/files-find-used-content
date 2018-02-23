@@ -258,7 +258,14 @@ module.exports = (course, stepCallback) => {
     wrapItUp(usedHtmlFilepaths);
 
     nonUsedFiles = nonUsedFiles.map(file => file.name);
-    course.newInfo('usedFiles', usedHtmlFilepaths);
+    var allFiles = usedHtmlFilepaths.map(function (fp) {
+        var filename = pathLib.basename(fp);
+        return {
+            name: filename,
+            path: fp
+        };
+    });
+    course.newInfo('usedFiles', allFiles);
     course.newInfo('nonUsedFiles', nonUsedFiles);
     stepCallback(null, course);
 };
