@@ -5,7 +5,7 @@ const pathLib = require('path'),
 /*Take a course object and return a list (array) of content pages that are used in the course. */
 module.exports = (course, stepCallback) => {
     var $;
-    //eventually use the 'reorganize file strucure repo for this except DO NOT replace codeFiles
+    //eventually use the 'reorganize file structure' repo for this except DO NOT replace codeFiles
     var docExts = ['.doc', '.docx', '.pdf', '.xls', '.xlsx', '.csv', '.odt', '.ods', '.txt', '.dat', '.log', '.mdb', '.sav', '.sql', '.tar',
             '.xlr', '.wpd', '.wks', '.wps', '.xlsm', '.rtf', '.xps', '.ppt', '.pptx', '.pps', '.slk',
         ],
