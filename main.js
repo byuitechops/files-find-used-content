@@ -92,7 +92,7 @@ module.exports = (course, stepCallback) => {
             //unfiltered resources should 
             .filter(toHtml)
             .filter(toUnique);
-        printRound(0);
+        //printRound(0);
         return resources;
     }
 
@@ -190,7 +190,7 @@ module.exports = (course, stepCallback) => {
         usedHtmlFilepaths = getKnownFilepaths(htmlFilepathObjs);
 
         if (filteredListOfFileObjs.length > 0) {
-            printRound(1);
+            //printRound(1);
             //because there are new filepaths, crawl that content for more html filepaths
             usedHtmlFilepaths = usedHtmlFilepaths
                 .concat(crawlContent(course, filteredListOfFileObjs))
