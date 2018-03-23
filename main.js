@@ -81,16 +81,25 @@ module.exports = (course, stepCallback) => {
             } else if (ext !== '.html') {
                 if (unknownFiles.includes(href)) {
                     console.log(chalk.green('unknown file type already recorded.'));
+                } else if (href.includes('?')) {
+                    handleQuery(href);
                 } else {
                     unknownFiles.push(href);
                 }
             }
         });
+
+        function handleQuery(filepath) {
+            var moreHrefs = [],
+                newPath = filepath.split('?')[0];
+            moreHrefs.push(newPath);
+            sortHrefs(moreHrefs);
+        }
         if (unknownFiles.length > 0) {
             unknownFiles.forEach((href) => {
                 course.warning('file type not recognized ' + href);
             });
-        } else if (unknownFiles.length !== 0) {
+        } else {
             course.message(chalk.green('there are no unknown file types.'));
         }
     }
