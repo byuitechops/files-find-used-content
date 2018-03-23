@@ -14,7 +14,8 @@ module.exports = (course, stepCallback) => {
         audVidExts = ['.avi', '.wmv', '.mpg', '.mpeg', '.swf', '.mov', '.mp4', '.aif', '.cda', '.mid', '.midi', '.mp3', '.wav', '.ogg',
             '.wma', '.wpl'
         ],
-        codeFiles = ['.css', '.js', '.xml'];
+        //rmgc file is a roots magic type added specifically for fhgen courses
+        codeFiles = ['.css', '.js', '.xml', '.rmgc'];
     /*helperFunction: convert to paths*/
     function htmlFileObjToPath(htmlFileObj) {
         return htmlFileObj.path;
@@ -92,8 +93,6 @@ module.exports = (course, stepCallback) => {
             unknownFiles.forEach((href) => {
                 course.warning('file type not recognized ' + href);
             });
-        } else {
-            course.message(chalk.green('there are no unknown file types.'));
         }
     }
 
