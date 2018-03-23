@@ -88,13 +88,6 @@ module.exports = (course, stepCallback) => {
                 }
             }
         });
-
-        function handleQuery(filepath) {
-            var moreHrefs = [],
-                newPath = filepath.split('?')[0];
-            moreHrefs.push(newPath);
-            sortHrefs(moreHrefs);
-        }
         if (unknownFiles.length > 0) {
             unknownFiles.forEach((href) => {
                 course.warning('file type not recognized ' + href);
@@ -102,6 +95,13 @@ module.exports = (course, stepCallback) => {
         } else {
             course.message(chalk.green('there are no unknown file types.'));
         }
+    }
+
+    function handleQuery(fp) {
+        var moreHrefs = [],
+            newPath = fp.split('?')[0];
+        moreHrefs.push(newPath);
+        sortHrefs(moreHrefs);
     }
 
     //1. Get List of absolute filepaths in the manifest
