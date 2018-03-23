@@ -274,6 +274,7 @@ module.exports = (course, stepCallback) => {
         courseVids = [],
         nonUsedFiles;
 
+    // setTimeout(function () {
     //crawl content
     usedHtmlFilepaths = crawlContent(course, fplist);
     wrapItUp(usedHtmlFilepaths);
@@ -289,4 +290,5 @@ module.exports = (course, stepCallback) => {
     course.newInfo('usedFiles', allFiles);
     course.newInfo('nonUsedFiles', nonUsedFiles);
     stepCallback(null, course);
+    // }, 0);
 };
