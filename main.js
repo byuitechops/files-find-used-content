@@ -1,7 +1,8 @@
 /*eslint-env node, es6*/
 
 const pathLib = require('path'),
-    URL = require('url');
+    URL = require('url'),
+    chalk = require('chalk');
 /*Take a course object and return a list (array) of content pages that are used in the course. */
 module.exports = (course, stepCallback) => {
     var $;
@@ -43,12 +44,12 @@ module.exports = (course, stepCallback) => {
     function noQuicklink(path) {
         return !path.includes('quickLink');
     }
-    var start = 1;
+    /*     var start = 1;
 
-    function printRound(n) {
-        start = start + n;
-        console.log('Starting Round #', start);
-    }
+        function printRound(n) {
+            start = start + n;
+            console.log('Starting Round #', start);
+        } */
     //helperFunction: for getManifestHtmlFilepaths
     function getManifest() {
         var manifest = course.content.find(function (file) {
@@ -58,6 +59,7 @@ module.exports = (course, stepCallback) => {
     }
     /*sorts hrefs to get used content, not just html filepaths */
     function sortHrefs(hrefs) {
+        var unknownFiles = [];
         hrefs.forEach(function (href) {
             var ext = pathLib.extname(href),
                 name = pathLib.basename(href);
@@ -77,9 +79,20 @@ module.exports = (course, stepCallback) => {
                     path: href
                 });
             } else if (ext !== '.html') {
-                course.warning('file type not recognized ' + href + 'EXTENSION' + ext);
+                if (unknownFiles.includes(href)) {
+                    console.log(chalk.green('unknown file type already recorded.'));
+                } else {
+                    unknownFiles.push(href);
+                }
             }
         });
+        if (unknownFiles.length > 0) {
+            unknownFiles.forEach((href) => {
+                course.warning('file type not recognized ' + href);
+            });
+        } else if (unknownFiles.length !== 0) {
+            course.message(chalk.green('there are no unknown file types.'));
+        }
     }
 
     //1. Get List of absolute filepaths in the manifest
@@ -92,7 +105,7 @@ module.exports = (course, stepCallback) => {
             //unfiltered resources should 
             .filter(toHtml)
             .filter(toUnique);
-        printRound(0);
+        //printRound(0);
         return resources;
     }
 
@@ -190,7 +203,7 @@ module.exports = (course, stepCallback) => {
         usedHtmlFilepaths = getKnownFilepaths(htmlFilepathObjs);
 
         if (filteredListOfFileObjs.length > 0) {
-            printRound(1);
+            //printRound(1);
             //because there are new filepaths, crawl that content for more html filepaths
             usedHtmlFilepaths = usedHtmlFilepaths
                 .concat(crawlContent(course, filteredListOfFileObjs))
