@@ -10,7 +10,7 @@ module.exports = (course, stepCallback) => {
     var docExts = ['.doc', '.docx', '.pdf', '.xls', '.xlsx', '.csv', '.odt', '.ods', '.txt', '.dat', '.log', '.mdb', '.sav', '.sql', '.tar',
             '.xlr', '.wpd', '.wks', '.wps', '.xlsm', '.rtf', '.xps', '.ppt', '.pptx', '.pps', '.slk',
         ],
-        imgExts = ['.png', '.jpeg', '.gif', '.bmp', '.ai', '.ico', '.jpg', '.ps', '.psd', '.svg', '.tif', '.tiff'],
+        imgExts = ['.png', '.PNG', '.jpg', '.jpeg', 'JPEG', '.gif', '.bmp', '.ai', '.ico', '.ps', '.psd', '.svg', '.tif', '.tiff'],
         audVidExts = ['.avi', '.wmv', '.mpg', '.mpeg', '.swf', '.mov', '.mp4', '.aif', '.cda', '.mid', '.midi', '.mp3', '.wav', '.ogg',
             '.wma', '.wpl'
         ],
