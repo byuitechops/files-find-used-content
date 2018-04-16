@@ -288,7 +288,7 @@ module.exports = (course, stepCallback) => {
         };
     });
     course.newInfo('usedFiles', allFiles);
-    course.newInfo('nonUsedFiles', nonUsedFiles);
+    course.newInfo('unusedFiles', nonUsedFiles);
     stepCallback(null, course);
     // }, 0);
 };
