@@ -274,21 +274,21 @@ module.exports = (course, stepCallback) => {
         courseVids = [],
         nonUsedFiles;
 
-    // setTimeout(function () {
-    //crawl content
-    usedHtmlFilepaths = crawlContent(course, fplist);
-    wrapItUp(usedHtmlFilepaths);
+    setTimeout(function () {
+        //crawl content
+        usedHtmlFilepaths = crawlContent(course, fplist);
+        wrapItUp(usedHtmlFilepaths);
 
-    nonUsedFiles = nonUsedFiles.map(file => file.name);
-    var allFiles = usedHtmlFilepaths.map(function (fp) {
-        var filename = pathLib.basename(fp);
-        return {
-            name: filename,
-            path: fp
-        };
-    });
-    course.newInfo('usedFiles', allFiles);
-    course.newInfo('unusedFiles', nonUsedFiles);
-    stepCallback(null, course);
-    // }, 0);
+        nonUsedFiles = nonUsedFiles.map(file => file.name);
+        var allFiles = usedHtmlFilepaths.map(function (fp) {
+            var filename = pathLib.basename(fp);
+            return {
+                name: filename,
+                path: fp
+            };
+        });
+        course.newInfo('usedFiles', allFiles);
+        course.newInfo('unusedFiles', nonUsedFiles);
+        stepCallback(null, course);
+    }, 0);
 };
