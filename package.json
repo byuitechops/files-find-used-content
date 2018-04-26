@@ -4,8 +4,7 @@
     "description": "Finds the used content in a given d2l export",
     "main": "main.js",
     "dependencies": {
-        "async": "^2.6.0",
-        "create-course-object": "github:byuitechops/create-course-object"
+        "async": "^2.6.0"
     },
     "devDependencies": {
         "child-development-kit": "github:byuitechops/child-development-kit",
