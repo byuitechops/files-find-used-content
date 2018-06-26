@@ -1,29 +1,29 @@
 {
-    "name": "files-find-used-content",
-    "version": "1.2.0",
-    "description": "Finds the used content in a given d2l export",
-    "main": "main.js",
-    "dependencies": {
-        "async": "^2.6.0"
-    },
-    "devDependencies": {
-        "child-development-kit": "github:byuitechops/child-development-kit",
-        "tap": "^10.7.3"
-    },
-    "scripts": {
-        "start": "node ./node_modules/child-development-kit/runChild.js",
-        "inspect": "node --inspect-brk ./node_modules/child-development-kit/runChild.js",
-        "test": "tap ./node_modules/child-development-kit/testChild.js -T"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://maeashley:KaraDawn2013@github.com/byuitechops/files-find-used-content.git"
-    },
-    "author": "Ashley Stewart",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/byuitechops/files-find-used-content/issues"
-    },
-    "homepage": "https://github.com/byuitechops/files-find-used-content#readme",
-    "childType": "preImport"
+  "name": "files-find-used-content",
+  "version": "1.2.0",
+  "description": "Finds the used content in a given d2l export",
+  "main": "main.js",
+  "dependencies": {
+    "async": "^2.6.0",
+    "canvas-api-wrapper": "^3.2.5"
+  },
+  "devDependencies": {
+    "child-development-kit": "github:byuitechops/child-development-kit",
+    "tap": "^10.7.3"
+  },
+  "scripts": {
+    "start": "node ./node_modules/child-development-kit/runChild.js",
+    "test": "tap ./node_modules/child-development-kit/runChild.js -T"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://maeashley:KaraDawn2013@github.com/byuitechops/files-find-used-content.git"
+  },
+  "author": "Ashley Stewart",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/byuitechops/files-find-used-content/issues"
+  },
+  "homepage": "https://github.com/byuitechops/files-find-used-content#readme",
+  "childType": "postImport"
 }
