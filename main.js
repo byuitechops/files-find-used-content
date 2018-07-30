@@ -44,18 +44,9 @@ module.exports = (courseObject, stepCallback) => {
 
         var course = canvas.getCourse(courseObject.info.canvasOU);
 
-        await course.pages.getComplete();
-        await course.quizzes.getComplete();
-        await course.discussions.get();
-        await course.assignments.get();
-        await course.modules.getComplete();
+        await course.getComplete()
 
-        let allItems = course.getSubs().reduce((acc, sub) => acc.concat(sub));
-        let questions = course.quizzes.reduce((acc, quiz) => [...acc, ...quiz.questions], []);
-        let moduleItems = course.modules.reduce((acc, module) => [...acc, ...module.moduleItems], []);
-        allItems = [...allItems, ...questions, ...moduleItems];
-
-        await course.files.get();
+        let allItems = course.getFlattened()
 
         let usedFiles = allItems.reduce(identifyFileLinks, []);
 

@@ -5,7 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "async": "^2.6.0",
-    "canvas-api-wrapper": "^3.2.5"
+    "canvas-api-wrapper": "^3.3.1"
   },
   "devDependencies": {
     "child-development-kit": "github:byuitechops/child-development-kit",
