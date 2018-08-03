@@ -7,13 +7,18 @@ module.exports = (courseObject, stepCallback) => {
 
         function identifyFileLinks(acc, item) {
             var fileId;
+            if (item.getHtml === undefined) {
+                console.log(item);
+            }
+
             if (item.constructor.name !== 'ModuleItem' && item.constructor.name !== 'Module' && item.getHtml()) {
                 var $ = cheerio.load(item.getHtml());
                 var elements = [...$('[href]').get(), ...$('[src]').get()];
                 elements.forEach(el => {
                     let link = '';
 
-                    if ($(el).attr('href')) {
+                    /* != undefined stops this from breaking when href is an empty string */
+                    if ($(el).attr('href') != undefined) {
                         link = $(el).attr('href');
                     } else {
                         link = $(el).attr('src');
@@ -44,9 +49,9 @@ module.exports = (courseObject, stepCallback) => {
 
         var course = canvas.getCourse(courseObject.info.canvasOU);
 
-        await course.getComplete()
+        await course.getComplete();
 
-        let allItems = course.getFlattened()
+        let allItems = course.getFlattened();
 
         let usedFiles = allItems.reduce(identifyFileLinks, []);
 
