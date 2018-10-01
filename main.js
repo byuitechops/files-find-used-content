@@ -1,19 +1,20 @@
 const canvas = require('canvas-api-wrapper');
 const cheerio = require('cheerio');
 
-module.exports = (courseObject, stepCallback) => {
+module.exports = (course, stepCallback) => {
 
     (async () => {
-
         function identifyFileLinks(acc, item) {
             var fileId;
+
             if (item.getHtml === undefined) {
-                console.log(item);
+                course.warn(`Unable to get HTML from ${item}`);
             }
 
             if (item.constructor.name !== 'ModuleItem' && item.constructor.name !== 'Module' && item.getHtml()) {
                 var $ = cheerio.load(item.getHtml());
                 var elements = [...$('[href]').get(), ...$('[src]').get()];
+
                 elements.forEach(el => {
                     let link = '';
 
@@ -23,13 +24,13 @@ module.exports = (courseObject, stepCallback) => {
                     } else {
                         link = $(el).attr('src');
                     }
-
+                    /* Grab fileID if it's a link to a file */
                     if (link.includes('/files/')) {
                         fileId = link.split('/files/')[1].split('/')[0];
                     }
 
                     if (fileId && !acc.includes(fileId)) {
-                        courseObject.log('Used Files', {
+                        course.log('Used Files', {
                             'File ID': fileId
                         });
                         acc.push(fileId);
@@ -38,7 +39,7 @@ module.exports = (courseObject, stepCallback) => {
             } else if (item.constructor.name === 'ModuleItem' && item.type === 'File') {
                 fileId = item.content_id;
                 if (fileId && !acc.includes(fileId)) {
-                    courseObject.log('Used Files', {
+                    course.log('Used Files', {
                         'File ID': fileId
                     });
                     acc.push(fileId);
@@ -47,15 +48,15 @@ module.exports = (courseObject, stepCallback) => {
             return acc;
         }
 
-        var course = canvas.getCourse(courseObject.info.canvasOU);
+        var apiCourse = canvas.getCourse(course.info.canvasOU);
 
-        await course.getComplete();
+        await apiCourse.getComplete();
 
-        let allItems = course.getFlattened();
+        let allItems = apiCourse.getFlattened();
 
         let usedFiles = allItems.reduce(identifyFileLinks, []);
 
-        courseObject.info.unusedFiles = course.files.reduce((acc, file) => {
+        course.info.unusedFiles = apiCourse.files.reduce((acc, file) => {
             if (!usedFiles.includes(file.getId())) {
                 return [...acc, file.getTitle()];
             } else {
@@ -63,7 +64,6 @@ module.exports = (courseObject, stepCallback) => {
             }
         }, []);
 
-        stepCallback(null, courseObject);
+        stepCallback(null, course);
     })();
-
 };
